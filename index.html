@@ -647,7 +647,7 @@
       setTimeout(() => {
         activePhotoNums.delete(n);
         d.remove();
-      }, 42000);
+      }, 40000);
     }
 
     function startPhotoParty(){
@@ -657,13 +657,13 @@
       photoParty.classList.add("active");
       warmCache();
 
-      for (let i = 0; i < 14; i++){
+      for (let i = 0; i < 10; i++){
         spawnFloatingPhoto();
       }
 
       setInterval(() => {
         spawnFloatingPhoto();
-      }, 1200);
+      }, 2000);
     }
 
     yesBtn.addEventListener("click", () => {
