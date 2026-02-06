@@ -41,7 +41,7 @@
       background: var(--accent2);
       opacity:.25;
       animation: floatUp linear infinite;
-      border-radius: 4px;
+       4px;
       pointer-events:none;
       z-index:0;
     }
@@ -74,11 +74,11 @@
       position:absolute;
       width: clamp(90px, 14vw, 180px);
       aspect-ratio: 4/5;
-      border-radius: 18px;
+      border-radius: 16px;
       overflow:hidden;
-      box-shadow: 0 18px 50px rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.45);
-      background:#fff;
+      box-shadow: 0 18px 50px rgba(0,0,0,.20);
+      border: none:
+      background: transparent;
       opacity:0;
 
       transform: translate3d(0,0,0);
@@ -97,7 +97,7 @@
       object-fit: contain;          /* no zoom/crop */
       object-position: center;
       display:block;
-      background: rgba(255,255,255,.9);
+      background: transparent;
     }
 
     @keyframes fadeLoop{
@@ -269,7 +269,7 @@
       object-fit: contain; /* show full img1 without crop */
       object-position:center;
       display:block;
-      background: rgba(255,255,255,.9);
+      background: transparent;
     }
 
     .btnAreaCenter{
@@ -629,8 +629,8 @@
       d.style.setProperty("--r0", rand(-18, 18) + "deg");
       d.style.setProperty("--r1", rand(-26, 26) + "deg");
 
-      d.style.setProperty("--driftDur", rand(24, 40) + "s");   // slower movement
-      d.style.setProperty("--fadeDur", rand(12, 18) + "s");    // slower fading
+      d.style.setProperty("--driftDur", rand(32, 55) + "s");   // slower movement
+      d.style.setProperty("--fadeDur", rand(20, 30) + "s");    // slower fading
 
       const delay = rand(0, 2.5);
       d.style.animationDelay = `${delay}s, ${delay}s`;
@@ -640,7 +640,7 @@
       setTimeout(() => {
         activePhotoNums.delete(n);
         d.remove();
-      }, 24000);
+      }, 42000);
     }
 
     function startPhotoParty(){
@@ -650,13 +650,13 @@
       photoParty.classList.add("active");
       warmCache();
 
-      for (let i = 0; i < 9; i++){
+      for (let i = 0; i < 14; i++){
         spawnFloatingPhoto();
       }
 
       setInterval(() => {
         spawnFloatingPhoto();
-      }, 2000);
+      }, 1200);
     }
 
     yesBtn.addEventListener("click", () => {
