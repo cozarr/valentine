@@ -485,15 +485,19 @@
     const attemptsUsed = document.getElementById("attemptsUsed");
     const quizStatus = document.getElementById("quizStatus");
 
-    function allCorrect(){
-      return (
-        inputs.meet.value   === ANSWERS.meet &&
-        inputs.color.value  === ANSWERS.color &&
-        inputs.animal.value === ANSWERS.animal &&
-        inputs.kisses.value === ANSWERS.kisses &&
-        inputs.love.value   === ANSWERS.love
-      );
-    }
+    function norm(s){
+  return (s ?? "").trim().toLowerCase();
+}
+
+function allCorrect(){
+  return (
+    norm(inputs.meet.value)   === norm(ANSWERS.meet) &&
+    norm(inputs.color.value)  === norm(ANSWERS.color) &&
+    norm(inputs.animal.value) === norm(ANSWERS.animal) &&
+    norm(inputs.kisses.value) === norm(ANSWERS.kisses) &&
+    norm(inputs.love.value)   === norm(ANSWERS.love)
+  );
+}
 
     function revealAnswers(){
       Object.values(hints).forEach(h => h.classList.add("show"));
