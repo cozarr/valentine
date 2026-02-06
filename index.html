@@ -595,8 +595,16 @@ function allCorrect(){
       const img = document.createElement("img");
       const n = Math.floor(rand(PARTY_START, PARTY_END + 1));
       img.src = photoUrl(n);
-      img.alt = "memory photo";
+      img.alt = ""; // prevents "memory photo" text from showing
+      img.decoding = "async";
+
+      img.onerror = () => {
+        // If the image can't load (bad path / missing file), remove this floating card
+        d.remove();
+      };
+
       d.appendChild(img);
+
 
       // randomized animation parameters via CSS variables
       const x0 = rand(-10, 90) + "vw";
@@ -612,8 +620,9 @@ function allCorrect(){
       d.style.setProperty("--r0", rand(-18, 18) + "deg");
       d.style.setProperty("--r1", rand(-26, 26) + "deg");
 
-      d.style.setProperty("--driftDur", rand(10, 18) + "s");
-      d.style.setProperty("--fadeDur", rand(5.5, 9.0) + "s");
+      d.style.setProperty("--driftDur", rand(24, 40) + "s");   // slower movement
+      d.style.setProperty("--fadeDur", rand(12, 18) + "s");    // slower fading
+
 
       // slight random delay so they don't sync
       d.style.animationDelay = `${rand(0, 2.5)}s, ${rand(0, 2.5)}s`;
@@ -629,23 +638,33 @@ function allCorrect(){
       partyStarted = true;
 
       photoParty.classList.add("active");
+      warmCache();
 
-      // spawn a wave immediately
-      for (let i = 0; i < 12; i++){
+      for (let i = 0; i < 9; i++){
         spawnFloatingPhoto();
       }
 
-      // keep spawning
       setInterval(() => {
-        // keep a steady but not overwhelming amount
+        // steady, less aggressive
         spawnFloatingPhoto();
-      }, 900);
+      }, 2000);
+function warmCache(){
+  // preload in the background gradually so it doesn't spike bandwidth
+  let n = PARTY_START;
+
+  const timer = setInterval(() => {
+    const im = new Image();
+    im.src = photoUrl(n);
+    n++;
+    if (n > PARTY_END) clearInterval(timer);
+  }, 120); // gentle preload pace
+}      
     }
 
     yesBtn.addEventListener("click", () => {
       toast.classList.add("show");
       startPhotoParty();
-
+      
       // lock the no button so it stops being chaotic after YES
       noBtn.style.display = "none";
       yesBtn.textContent = "YES ✅";
