@@ -80,9 +80,17 @@
       border: 1px solid rgba(255,255,255,.45);
       background:#fff;
       opacity:0;
+    
       animation:
-        drift var(--driftDur) linear infinite,
+        drift var(--driftDur) ease-in-out infinite,
         fadeLoop var(--fadeDur) ease-in-out infinite;
+    
+      /* KEY FIXES */
+      animation-direction: alternate, normal;       /* drift ping-pongs, fade stays normal */
+      animation-fill-mode: both, both;
+      will-change: transform, opacity;
+    }
+
       transform: translate3d(0,0,0);
     }
     .floatPhoto img{
@@ -420,6 +428,7 @@
     // Background party photos after YES (img2..img52)
     const PARTY_START = 2;
     const PARTY_END = 52;
+    const activePhotoNums = new Set();
 
     /***********************
      * BACKGROUND HEARTS
@@ -593,15 +602,34 @@ function allCorrect(){
       d.className = "floatPhoto";
 
       const img = document.createElement("img");
-      const n = Math.floor(rand(PARTY_START, PARTY_END + 1));
+      let n;
+
+      // If we still have unused photos available, pick one not already active
+      const maxUnique = PARTY_END - PARTY_START + 1;
+      
+      if (activePhotoNums.size < maxUnique) {
+        do {
+          n = Math.floor(rand(PARTY_START, PARTY_END + 1));
+        } while (activePhotoNums.has(n));
+      } else {
+        // If somehow we have them all active, allow reuse (shouldn't happen with your spawn rate)
+        n = Math.floor(rand(PARTY_START, PARTY_END + 1));
+      }
+      
+      activePhotoNums.add(n);
+      
       img.src = photoUrl(n);
+      img.alt = "";
+      img.decoding = "async";
+
       img.alt = ""; // prevents "memory photo" text from showing
       img.decoding = "async";
 
       img.onerror = () => {
-        // If the image can't load (bad path / missing file), remove this floating card
+        activePhotoNums.delete(n);
         d.remove();
       };
+
 
       d.appendChild(img);
 
@@ -625,12 +653,18 @@ function allCorrect(){
 
 
       // slight random delay so they don't sync
-      d.style.animationDelay = `${rand(0, 2.5)}s, ${rand(0, 2.5)}s`;
+      const delay = rand(0, 2.5);
+      d.style.animationDelay = `${delay}s, ${delay}s`;
+
 
       photoParty.appendChild(d);
 
       // remove after some time so DOM doesn't grow forever
-      setTimeout(() => d.remove(), 24000);
+      setTimeout(() => {
+        activePhotoNums.delete(n);
+        d.remove();
+      }, 24000);
+
     }
 
     function startPhotoParty(){
