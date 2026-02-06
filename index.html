@@ -1,1 +1,652 @@
-holder 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Secret Message 💌</title>
+
+  <style>
+    :root{
+      --bg1:#fff1f5;
+      --bg2:#ffe4e6;
+      --card: rgba(255,255,255,.78);
+      --text:#111827;
+      --muted:#6b7280;
+      --accent:#f43f5e;
+      --accent2:#fb7185;
+      --shadow: 0 22px 70px rgba(0,0,0,.14);
+      --radius: 28px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
+        radial-gradient(900px 700px at 80% 30%, #ffd1dc, transparent 55%),
+        linear-gradient(180deg, var(--bg1), #fff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    /* subtle floating hearts in background */
+    .heart{
+      position:fixed;
+      width:16px;height:16px;
+      transform: rotate(45deg);
+      background: var(--accent2);
+      opacity:.25;
+      animation: floatUp linear infinite;
+      border-radius: 4px;
+      pointer-events:none;
+      z-index:0;
+    }
+    .heart:before,.heart:after{
+      content:"";
+      position:absolute;
+      width:16px;height:16px;
+      background: var(--accent2);
+      border-radius: 50%;
+    }
+    .heart:before{left:-8px;top:0}
+    .heart:after{left:0;top:-8px}
+    @keyframes floatUp{
+      from{transform:translateY(110vh) rotate(45deg) scale(1); filter:blur(.2px)}
+      to{transform:translateY(-20vh) rotate(45deg) scale(1); filter:blur(0px)}
+    }
+
+    /* floating photo party layer (hidden until YES) */
+    #photoParty{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      opacity:0;
+      transition: opacity 600ms ease;
+    }
+    #photoParty.active{ opacity:1; }
+
+    .floatPhoto{
+      position:absolute;
+      width: clamp(90px, 14vw, 180px);
+      aspect-ratio: 4/5;
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.45);
+      background:#fff;
+      opacity:0;
+      animation:
+        drift var(--driftDur) linear infinite,
+        fadeLoop var(--fadeDur) ease-in-out infinite;
+      transform: translate3d(0,0,0);
+    }
+    .floatPhoto img{
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
+      filter:saturate(1.05) contrast(1.03);
+    }
+    @keyframes fadeLoop{
+      0%{opacity:0}
+      15%{opacity:0.95}
+      50%{opacity:0.55}
+      85%{opacity:0.95}
+      100%{opacity:0}
+    }
+    @keyframes drift{
+      from{ transform: translate(var(--x0), var(--y0)) rotate(var(--r0)); }
+      to  { transform: translate(var(--x1), var(--y1)) rotate(var(--r1)); }
+    }
+
+    /* app shell */
+    .shell{
+      width: min(920px, 92vw);
+      z-index:2;
+      position:relative;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(244,63,94,.18);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 26px;
+    }
+
+    .hidden{ display:none !important; }
+
+    h1{
+      margin:0 0 8px;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing:-.02em;
+      line-height:1.05;
+    }
+    h2{
+      margin:0 0 12px;
+      font-size: clamp(18px, 2.4vw, 24px);
+      letter-spacing:-.01em;
+    }
+    p{ margin:0; }
+    .sub{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    /* intro fade */
+    .fadeIn{
+      opacity:0;
+      transform: translateY(6px);
+      animation: appear 900ms ease forwards;
+    }
+    .delay1{ animation-delay: 150ms; }
+    .delay2{ animation-delay: 950ms; }
+    @keyframes appear{
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    .btnRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top: 14px;
+    }
+    button{
+      border:0;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-weight:800;
+      font-size: 16px;
+      cursor:pointer;
+      transition: transform .10s ease, filter .2s ease;
+      user-select:none;
+    }
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    .primary{
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: white;
+      box-shadow: 0 10px 25px rgba(244,63,94,.25);
+    }
+    .dark{
+      background:#111827;
+      color:white;
+      opacity:.92;
+    }
+
+    /* quiz */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 720px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .q{
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    label{
+      display:block;
+      font-weight:800;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    input{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.12);
+      outline:none;
+      font-size: 15px;
+      background: rgba(255,255,255,.95);
+    }
+    input:focus{
+      border-color: rgba(244,63,94,.55);
+      box-shadow: 0 0 0 4px rgba(244,63,94,.12);
+    }
+
+    .hint{
+      margin-top: 8px;
+      font-size: 13px;
+      color: rgba(244,63,94,.95);
+      font-weight: 700;
+      display:none;
+    }
+    .hint.show{ display:block; }
+
+    .status{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+    .status strong{ color:#111827; }
+
+    /* valentine screen */
+    .valWrap{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      align-items:stretch;
+      position:relative;
+    }
+    @media (max-width: 860px){
+      .valWrap{ grid-template-columns:1fr; }
+    }
+
+    .photoBox{
+      border-radius: 22px;
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.06);
+      background:#fff;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+      aspect-ratio: 16/10;
+    }
+    .photoBox img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .btnArea{
+      position:relative;
+      min-height: 130px;
+      margin-top: 10px;
+    }
+    #noBtn{
+      position:absolute;
+      left: 140px;
+      top: 10px;
+      white-space:nowrap;
+    }
+    #yesBtn{
+      transform-origin: center;
+    }
+
+    /* tiny celebratory toast */
+    .toast{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(244,63,94,.18);
+      color: #111827;
+      display:none;
+    }
+    .toast.show{ display:block; }
+  </style>
+</head>
+
+<body>
+  <div id="hearts"></div>
+  <div id="photoParty" aria-hidden="true"></div>
+
+  <div class="shell">
+    <!-- SCREEN 1: INTRO -->
+    <section id="screenIntro" class="card">
+      <h1 class="fadeIn delay1">Hey Bella 💖</h1>
+      <p class="sub fadeIn delay1">
+        Secret message!
+      </p>
+      <div class="btnRow">
+        <button id="toQuizBtn" class="primary fadeIn delay2">
+          Click here to view secret message 🔒
+        </button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: QUIZ -->
+    <section id="screenQuiz" class="card hidden">
+      <h2>Unlock the secret message 🗝️</h2>
+      <p class="sub">
+        Answer these exactly right. (Theres literally no way you get this wrong)
+      </p>
+
+      <div class="grid">
+        <div class="q">
+          <label for="qMeet">Where did we meet?</label>
+          <input id="qMeet" placeholder="Type answer…" />
+          <div class="hint" id="hintMeet">Answer: <span></span></div>
+        </div>
+
+        <div class="q">
+          <label for="qColor">What’s my favorite color?</label>
+          <input id="qColor" placeholder="Type answer…" />
+          <div class="hint" id="hintColor">Answer: <span></span></div>
+        </div>
+
+        <div class="q">
+          <label for="qAnimal">What’s my favorite animal?</label>
+          <input id="qAnimal" placeholder="Type answer…" />
+          <div class="hint" id="hintAnimal">Answer: <span></span></div>
+        </div>
+
+        <div class="q">
+          <label for="qKisses">How many kisses are you supposed to give me at a time?</label>
+          <input id="qKisses" placeholder="Type answer…" />
+          <div class="hint" id="hintKisses">Answer: <span></span></div>
+        </div>
+
+        <div class="q" style="grid-column: 1 / -1;">
+          <label for="qLove">Do you love me?</label>
+          <input id="qLove" placeholder="Type answer…" />
+          <div class="hint" id="hintLove">Answer: <span></span></div>
+        </div>
+      </div>
+
+      <div class="btnRow">
+        <button id="submitQuizBtn" class="primary">Submit ✅</button>
+      </div>
+
+      <div class="status" id="quizStatus">
+        Attempts: <strong><span id="attemptsUsed">0</span>/3</strong>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: VALENTINE -->
+    <section id="screenValentine" class="card hidden">
+      <div class="valWrap">
+        <div>
+          <h1 style="margin-bottom:10px;">Will you be my Valentine? 💘</h1>
+          <div class="photoBox">
+            <img src="images/img1.jpg" alt="valentine photo">
+          </div>
+
+          <div class="btnArea" id="btnArea">
+            <button id="yesBtn" class="primary">Yes </button>
+            <button id="noBtn" class="dark">No </button>
+          </div>
+
+          <div class="toast" id="toast">
+            <div style="font-weight:900; font-size:18px;">YAYYYYYY </div>
+            <div style="margin-top:6px; color:var(--muted); line-height:1.35;">
+              You make me the happiest person ever 
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 style="margin-top:4px;">Important note</h2>
+          <p class="sub">
+            The “No” button is known to act UP dont let that shit run
+          </p>
+          <p class="sub" style="margin-top:10px;">
+            (Also yes is the correct answer. Just saying.)
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /***********************
+     * EDITABLE SETTINGS
+     ***********************/
+    // Exact-match answers (case-sensitive exact typing)
+    const ANSWERS = {
+      meet:   "Emmas",
+      color:  "Blue",
+      animal: "Raccoon",
+      kisses: "3",
+      love:   "yes"
+    };
+
+    // No button phrases (changes each attempt)
+    const NO_PHRASES = [
+      "No",
+      "Wait… no??",
+      "Bella pls 😭",
+      "What the fuck",
+      "Don’t do me like that",
+      "Ew bro whats wrong with you",
+      "Im taking the kids",
+      "You'll never see Ben again"
+    ];
+
+    // Background party photos after YES (img2..img52)
+    const PARTY_START = 2;
+    const PARTY_END = 52;
+
+    /***********************
+     * BACKGROUND HEARTS
+     ***********************/
+    const heartsWrap = document.getElementById("hearts");
+    for (let i = 0; i < 18; i++) {
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.animationDuration = (8 + Math.random() * 10) + "s";
+      h.style.animationDelay = (-Math.random() * 10) + "s";
+      h.style.transform = `rotate(45deg) scale(${0.7 + Math.random() * 1.3})`;
+      heartsWrap.appendChild(h);
+    }
+
+    /***********************
+     * SCREEN NAV
+     ***********************/
+    const screenIntro = document.getElementById("screenIntro");
+    const screenQuiz = document.getElementById("screenQuiz");
+    const screenVal = document.getElementById("screenValentine");
+
+    document.getElementById("toQuizBtn").addEventListener("click", () => {
+      screenIntro.classList.add("hidden");
+      screenQuiz.classList.remove("hidden");
+    });
+
+    function goToValentine(){
+      screenQuiz.classList.add("hidden");
+      screenVal.classList.remove("hidden");
+      // Position the No button nicely on load
+      positionNoButtonInitial();
+    }
+
+    /***********************
+     * QUIZ LOGIC
+     ***********************/
+    let attempts = 0;
+
+    const inputs = {
+      meet: document.getElementById("qMeet"),
+      color: document.getElementById("qColor"),
+      animal: document.getElementById("qAnimal"),
+      kisses: document.getElementById("qKisses"),
+      love: document.getElementById("qLove")
+    };
+
+    const hints = {
+      meet: document.getElementById("hintMeet"),
+      color: document.getElementById("hintColor"),
+      animal: document.getElementById("hintAnimal"),
+      kisses: document.getElementById("hintKisses"),
+      love: document.getElementById("hintLove")
+    };
+
+    // Put answer text into each hint span
+    hints.meet.querySelector("span").textContent = ANSWERS.meet;
+    hints.color.querySelector("span").textContent = ANSWERS.color;
+    hints.animal.querySelector("span").textContent = ANSWERS.animal;
+    hints.kisses.querySelector("span").textContent = ANSWERS.kisses;
+    hints.love.querySelector("span").textContent = ANSWERS.love;
+
+    const attemptsUsed = document.getElementById("attemptsUsed");
+    const quizStatus = document.getElementById("quizStatus");
+
+    function allCorrect(){
+      return (
+        inputs.meet.value   === ANSWERS.meet &&
+        inputs.color.value  === ANSWERS.color &&
+        inputs.animal.value === ANSWERS.animal &&
+        inputs.kisses.value === ANSWERS.kisses &&
+        inputs.love.value   === ANSWERS.love
+      );
+    }
+
+    function revealAnswers(){
+      Object.values(hints).forEach(h => h.classList.add("show"));
+      quizStatus.innerHTML = `
+        Attempts: <strong>${attempts}/3</strong><br>
+        Okay so clearly you know nothing about me..
+      `;
+    }
+
+    document.getElementById("submitQuizBtn").addEventListener("click", () => {
+      if (allCorrect()){
+        goToValentine();
+        return;
+      }
+
+      attempts++;
+      attemptsUsed.textContent = String(attempts);
+
+      if (attempts >= 3){
+        revealAnswers();
+      } else {
+        quizStatus.innerHTML = `
+          Attempts: <strong>${attempts}/3</strong><br>
+          No try again
+        `;
+      }
+    });
+
+    /***********************
+     * VALENTINE BUTTONS
+     ***********************/
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const btnArea = document.getElementById("btnArea");
+    const toast = document.getElementById("toast");
+
+    let noTries = 0;
+    let yesScale = 1;
+
+    function positionNoButtonInitial(){
+      // place it to the right of yes button on first load
+      // (No button is absolutely positioned)
+      const yesRect = yesBtn.getBoundingClientRect();
+      const areaRect = btnArea.getBoundingClientRect();
+
+      const left = Math.min(areaRect.width - noBtn.offsetWidth - 8, 160);
+      const top = 10;
+      noBtn.style.left = left + "px";
+      noBtn.style.top = top + "px";
+    }
+
+    function moveNoButton(){
+      // change phrase
+      noBtn.textContent = NO_PHRASES[noTries % NO_PHRASES.length];
+      noTries++;
+
+      // grow YES button noticeably
+      yesScale += 0.14;
+      yesBtn.style.transform = `scale(${yesScale})`;
+
+      // move NO button to a random safe position within btnArea
+      const areaRect = btnArea.getBoundingClientRect();
+      const pad = 8;
+
+      const maxX = areaRect.width - noBtn.offsetWidth - pad;
+      const maxY = areaRect.height - noBtn.offsetHeight - pad;
+
+      const x = pad + Math.random() * Math.max(1, maxX - pad);
+      const y = pad + Math.random() * Math.max(1, maxY - pad);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+    }
+
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    });
+
+    /***********************
+     * YES -> PHOTO PARTY
+     ***********************/
+    const photoParty = document.getElementById("photoParty");
+    let partyStarted = false;
+
+    function rand(min, max){ return min + Math.random() * (max - min); }
+
+    function photoUrl(n){ return `images/img${n}.jpg`; }
+
+    function spawnFloatingPhoto(){
+      const d = document.createElement("div");
+      d.className = "floatPhoto";
+
+      const img = document.createElement("img");
+      const n = Math.floor(rand(PARTY_START, PARTY_END + 1));
+      img.src = photoUrl(n);
+      img.alt = "memory photo";
+      d.appendChild(img);
+
+      // randomized animation parameters via CSS variables
+      const x0 = rand(-10, 90) + "vw";
+      const y0 = rand(-10, 90) + "vh";
+      const x1 = rand(-10, 90) + "vw";
+      const y1 = rand(-10, 90) + "vh";
+
+      d.style.setProperty("--x0", x0);
+      d.style.setProperty("--y0", y0);
+      d.style.setProperty("--x1", x1);
+      d.style.setProperty("--y1", y1);
+
+      d.style.setProperty("--r0", rand(-18, 18) + "deg");
+      d.style.setProperty("--r1", rand(-26, 26) + "deg");
+
+      d.style.setProperty("--driftDur", rand(10, 18) + "s");
+      d.style.setProperty("--fadeDur", rand(5.5, 9.0) + "s");
+
+      // slight random delay so they don't sync
+      d.style.animationDelay = `${rand(0, 2.5)}s, ${rand(0, 2.5)}s`;
+
+      photoParty.appendChild(d);
+
+      // remove after some time so DOM doesn't grow forever
+      setTimeout(() => d.remove(), 24000);
+    }
+
+    function startPhotoParty(){
+      if (partyStarted) return;
+      partyStarted = true;
+
+      photoParty.classList.add("active");
+
+      // spawn a wave immediately
+      for (let i = 0; i < 12; i++){
+        spawnFloatingPhoto();
+      }
+
+      // keep spawning
+      setInterval(() => {
+        // keep a steady but not overwhelming amount
+        spawnFloatingPhoto();
+      }, 900);
+    }
+
+    yesBtn.addEventListener("click", () => {
+      toast.classList.add("show");
+      startPhotoParty();
+
+      // lock the no button so it stops being chaotic after YES
+      noBtn.style.display = "none";
+      yesBtn.textContent = "YES ✅";
+      yesBtn.style.transform = "scale(1.12)";
+    });
+  </script>
+</body>
+</html>
