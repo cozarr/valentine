@@ -285,6 +285,7 @@
     #noBtn{
       position:absolute;
       white-space:nowrap;
+      transition: left 120ms ease, top 120ms ease;
     }
     #yesBtn{
       transform-origin: center;
@@ -534,8 +535,14 @@
 
     function positionNoButtonInitial(){
       const areaRect = btnArea.getBoundingClientRect();
-      const x = Math.min(areaRect.width - noBtn.offsetWidth - 12, (areaRect.width / 2) + 90);
+    
+      // Center area
+      const centerX = areaRect.width / 2;
+    
+      // Put "No" slightly to the right of center and aligned with the buttons
+      const x = Math.min(areaRect.width - noBtn.offsetWidth - 12, centerX + 90);
       const y = 18;
+    
       noBtn.style.left = x + "px";
       noBtn.style.top = y + "px";
     }
@@ -560,9 +567,9 @@
       noBtn.style.top = y + "px";
     }
 
-    noBtn.addEventListener("mouseenter", moveNoButton);
     noBtn.addEventListener("click", (e) => {
       e.preventDefault();
+      e.stopPropagation();
       moveNoButton();
     });
 
