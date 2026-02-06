@@ -64,7 +64,7 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:0;
+      z-index:50;
       opacity:0;
       transition: opacity 600ms ease;
     }
@@ -76,7 +76,7 @@
       aspect-ratio: 4/5;
       border-radius: 18px;
       overflow:hidden;
-      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      box-shadow: 0 18px 50px rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.45);
       background:#fff;
       opacity:0;
@@ -94,11 +94,14 @@
       transform: translate3d(0,0,0);
     }
     .floatPhoto img{
-      width:100%; height:100%;
-      object-fit:cover;
+      width:100%;
+      height:100%;
+      object-fit: contain;          /* ✅ no zoom/crop */
+      object-position: center;
       display:block;
-      filter:saturate(1.05) contrast(1.03);
+      background: rgba(255,255,255,.9); /* fills any empty bars nicely */
     }
+
     @keyframes fadeLoop{
       0%{opacity:0}
       15%{opacity:0.95}
@@ -263,11 +266,37 @@
       box-shadow: 0 16px 40px rgba(0,0,0,.12);
       aspect-ratio: 16/10;
     }
+    
     .photoBox img{
       width:100%;
       height:100%;
       object-fit:cover;
       display:block;
+    }
+    /* Centered Valentine layout */
+    .valCenter{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      gap: 12px;
+    }
+    
+    .btnAreaCenter{
+      position:relative;
+      width: min(520px, 92%);
+      height: 150px;
+      margin-top: 8px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      gap: 12px;
+    }
+    
+    /* Make sure the main photo is centered nicely */
+    .photoBox{
+      width: min(640px, 100%);
+      margin: 0 auto;
     }
 
     .btnArea{
@@ -367,34 +396,23 @@
 
     <!-- SCREEN 3: VALENTINE -->
     <section id="screenValentine" class="card hidden">
-      <div class="valWrap">
-        <div>
-          <h1 style="margin-bottom:10px;">Will you be my Valentine? 💘</h1>
-          <div class="photoBox">
-            <img src="images/img1.jpg" alt="valentine photo">
-          </div>
-
-          <div class="btnArea" id="btnArea">
-            <button id="yesBtn" class="primary">Yes </button>
-            <button id="noBtn" class="dark">No </button>
-          </div>
-
-          <div class="toast" id="toast">
-            <div style="font-weight:900; font-size:18px;">YAYYYYYY </div>
-            <div style="margin-top:6px; color:var(--muted); line-height:1.35;">
-              You make me the happiest person ever 
-            </div>
-          </div>
+      <div class="valCenter">
+        <h1 style="margin-bottom:12px;">Will you be my Valentine? 💘</h1>
+    
+        <div class="photoBox">
+          <img src="images/img1.jpg" alt="valentine photo">
         </div>
-
-        <div>
-          <h2 style="margin-top:4px;">Important note</h2>
-          <p class="sub">
-            The “No” button is known to act UP dont let that shit run
-          </p>
-          <p class="sub" style="margin-top:10px;">
-            (Also yes is the correct answer. Just saying.)
-          </p>
+    
+        <div class="btnAreaCenter" id="btnArea">
+          <button id="yesBtn" class="primary">Yes</button>
+          <button id="noBtn" class="dark">No</button>
+        </div>
+    
+        <div class="toast" id="toast">
+          <div style="font-weight:900; font-size:18px;">YAYYYYYY </div>
+          <div style="margin-top:6px; color:var(--muted); line-height:1.35;">
+            You make me the happiest person ever.
+          </div>
         </div>
       </div>
     </section>
@@ -547,16 +565,18 @@ function allCorrect(){
     let yesScale = 1;
 
     function positionNoButtonInitial(){
-      // place it to the right of yes button on first load
-      // (No button is absolutely positioned)
-      const yesRect = yesBtn.getBoundingClientRect();
       const areaRect = btnArea.getBoundingClientRect();
-
-      const left = Math.min(areaRect.width - noBtn.offsetWidth - 8, 160);
-      const top = 10;
-      noBtn.style.left = left + "px";
-      noBtn.style.top = top + "px";
+    
+      // Place YES roughly centered; NO to the right
+      // YES is normal flow (not absolutely positioned)
+      // NO is absolutely positioned, so we place it visually next to YES.
+      const x = Math.min(areaRect.width - noBtn.offsetWidth - 12, (areaRect.width / 2) + 90);
+      const y = 18;
+    
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
     }
+
 
     function moveNoButton(){
       // change phrase
