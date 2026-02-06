@@ -64,7 +64,7 @@
       position:fixed;
       inset:0;
       pointer-events:none;
-      z-index:50;
+      z-index:50; /* over the card */
       opacity:0;
       transition: opacity 600ms ease;
     }
@@ -80,26 +80,24 @@
       border: 1px solid rgba(255,255,255,.45);
       background:#fff;
       opacity:0;
-    
+
+      transform: translate3d(0,0,0);
+
       animation:
         drift var(--driftDur) ease-in-out infinite,
         fadeLoop var(--fadeDur) ease-in-out infinite;
-    
-      /* KEY FIXES */
-      animation-direction: alternate, normal;       /* drift ping-pongs, fade stays normal */
+
+      animation-direction: alternate, normal; /* drift ping-pongs */
       animation-fill-mode: both, both;
       will-change: transform, opacity;
-    }
-
-      transform: translate3d(0,0,0);
     }
     .floatPhoto img{
       width:100%;
       height:100%;
-      object-fit: contain;          /* ✅ no zoom/crop */
+      object-fit: contain;          /* no zoom/crop */
       object-position: center;
       display:block;
-      background: rgba(255,255,255,.9); /* fills any empty bars nicely */
+      background: rgba(255,255,255,.9);
     }
 
     @keyframes fadeLoop{
@@ -247,33 +245,6 @@
     .status strong{ color:#111827; }
 
     /* valentine screen */
-    .valWrap{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-      align-items:stretch;
-      position:relative;
-    }
-    @media (max-width: 860px){
-      .valWrap{ grid-template-columns:1fr; }
-    }
-
-    .photoBox{
-      border-radius: 22px;
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.06);
-      background:#fff;
-      box-shadow: 0 16px 40px rgba(0,0,0,.12);
-      aspect-ratio: 16/10;
-    }
-    
-    .photoBox img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    /* Centered Valentine layout */
     .valCenter{
       display:flex;
       flex-direction:column;
@@ -281,7 +252,26 @@
       text-align:center;
       gap: 12px;
     }
-    
+
+    .photoBox{
+      width: min(640px, 100%);
+      margin: 0 auto;
+      border-radius: 22px;
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.06);
+      background:#fff;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+      aspect-ratio: 16/10;
+    }
+    .photoBox img{
+      width:100%;
+      height:100%;
+      object-fit: contain; /* show full img1 without crop */
+      object-position:center;
+      display:block;
+      background: rgba(255,255,255,.9);
+    }
+
     .btnAreaCenter{
       position:relative;
       width: min(520px, 92%);
@@ -292,22 +282,8 @@
       align-items:flex-start;
       gap: 12px;
     }
-    
-    /* Make sure the main photo is centered nicely */
-    .photoBox{
-      width: min(640px, 100%);
-      margin: 0 auto;
-    }
-
-    .btnArea{
-      position:relative;
-      min-height: 130px;
-      margin-top: 10px;
-    }
     #noBtn{
       position:absolute;
-      left: 140px;
-      top: 10px;
       white-space:nowrap;
     }
     #yesBtn{
@@ -336,9 +312,7 @@
     <!-- SCREEN 1: INTRO -->
     <section id="screenIntro" class="card">
       <h1 class="fadeIn delay1">Hey Bella 💖</h1>
-      <p class="sub fadeIn delay1">
-        Secret message!
-      </p>
+      <p class="sub fadeIn delay1">Secret message!</p>
       <div class="btnRow">
         <button id="toQuizBtn" class="primary fadeIn delay2">
           Click here to view secret message 🔒
@@ -349,9 +323,7 @@
     <!-- SCREEN 2: QUIZ -->
     <section id="screenQuiz" class="card hidden">
       <h2>Unlock the secret message 🗝️</h2>
-      <p class="sub">
-        Answer these exactly right. (Theres literally no way you get this wrong)
-      </p>
+      <p class="sub">Answer these exactly right. (Theres literally no way you get this wrong)</p>
 
       <div class="grid">
         <div class="q">
@@ -398,18 +370,18 @@
     <section id="screenValentine" class="card hidden">
       <div class="valCenter">
         <h1 style="margin-bottom:12px;">Will you be my Valentine? 💘</h1>
-    
+
         <div class="photoBox">
           <img src="images/img1.jpg" alt="valentine photo">
         </div>
-    
+
         <div class="btnAreaCenter" id="btnArea">
           <button id="yesBtn" class="primary">Yes</button>
           <button id="noBtn" class="dark">No</button>
         </div>
-    
+
         <div class="toast" id="toast">
-          <div style="font-weight:900; font-size:18px;">YAYYYYYY </div>
+          <div style="font-weight:900; font-size:18px;">YAYYYYYY</div>
           <div style="margin-top:6px; color:var(--muted); line-height:1.35;">
             You make me the happiest person ever.
           </div>
@@ -422,7 +394,6 @@
     /***********************
      * EDITABLE SETTINGS
      ***********************/
-    // Exact-match answers (case-sensitive exact typing)
     const ANSWERS = {
       meet:   "Emmas",
       color:  "Blue",
@@ -431,7 +402,6 @@
       love:   "yes"
     };
 
-    // No button phrases (changes each attempt)
     const NO_PHRASES = [
       "No",
       "Wait… no??",
@@ -443,9 +413,9 @@
       "You'll never see Ben again"
     ];
 
-    // Background party photos after YES (img2..img52)
     const PARTY_START = 2;
     const PARTY_END = 52;
+
     const activePhotoNums = new Set();
 
     /***********************
@@ -477,7 +447,6 @@
     function goToValentine(){
       screenQuiz.classList.add("hidden");
       screenVal.classList.remove("hidden");
-      // Position the No button nicely on load
       positionNoButtonInitial();
     }
 
@@ -502,7 +471,6 @@
       love: document.getElementById("hintLove")
     };
 
-    // Put answer text into each hint span
     hints.meet.querySelector("span").textContent = ANSWERS.meet;
     hints.color.querySelector("span").textContent = ANSWERS.color;
     hints.animal.querySelector("span").textContent = ANSWERS.animal;
@@ -513,18 +481,18 @@
     const quizStatus = document.getElementById("quizStatus");
 
     function norm(s){
-  return (s ?? "").trim().toLowerCase();
-}
+      return (s ?? "").trim().toLowerCase();
+    }
 
-function allCorrect(){
-  return (
-    norm(inputs.meet.value)   === norm(ANSWERS.meet) &&
-    norm(inputs.color.value)  === norm(ANSWERS.color) &&
-    norm(inputs.animal.value) === norm(ANSWERS.animal) &&
-    norm(inputs.kisses.value) === norm(ANSWERS.kisses) &&
-    norm(inputs.love.value)   === norm(ANSWERS.love)
-  );
-}
+    function allCorrect(){
+      return (
+        norm(inputs.meet.value)   === norm(ANSWERS.meet) &&
+        norm(inputs.color.value)  === norm(ANSWERS.color) &&
+        norm(inputs.animal.value) === norm(ANSWERS.animal) &&
+        norm(inputs.kisses.value) === norm(ANSWERS.kisses) &&
+        norm(inputs.love.value)   === norm(ANSWERS.love)
+      );
+    }
 
     function revealAnswers(){
       Object.values(hints).forEach(h => h.classList.add("show"));
@@ -566,28 +534,19 @@ function allCorrect(){
 
     function positionNoButtonInitial(){
       const areaRect = btnArea.getBoundingClientRect();
-    
-      // Place YES roughly centered; NO to the right
-      // YES is normal flow (not absolutely positioned)
-      // NO is absolutely positioned, so we place it visually next to YES.
       const x = Math.min(areaRect.width - noBtn.offsetWidth - 12, (areaRect.width / 2) + 90);
       const y = 18;
-    
       noBtn.style.left = x + "px";
       noBtn.style.top = y + "px";
     }
 
-
     function moveNoButton(){
-      // change phrase
       noBtn.textContent = NO_PHRASES[noTries % NO_PHRASES.length];
       noTries++;
 
-      // grow YES button noticeably
       yesScale += 0.14;
       yesBtn.style.transform = `scale(${yesScale})`;
 
-      // move NO button to a random safe position within btnArea
       const areaRect = btnArea.getBoundingClientRect();
       const pad = 8;
 
@@ -617,32 +576,37 @@ function allCorrect(){
 
     function photoUrl(n){ return `images/img${n}.jpg`; }
 
+    function warmCache(){
+      let n = PARTY_START;
+      const timer = setInterval(() => {
+        const im = new Image();
+        im.src = photoUrl(n);
+        n++;
+        if (n > PARTY_END) clearInterval(timer);
+      }, 120);
+    }
+
     function spawnFloatingPhoto(){
       const d = document.createElement("div");
       d.className = "floatPhoto";
 
       const img = document.createElement("img");
-      let n;
 
-      // If we still have unused photos available, pick one not already active
+      let n;
       const maxUnique = PARTY_END - PARTY_START + 1;
-      
+
       if (activePhotoNums.size < maxUnique) {
         do {
           n = Math.floor(rand(PARTY_START, PARTY_END + 1));
         } while (activePhotoNums.has(n));
       } else {
-        // If somehow we have them all active, allow reuse (shouldn't happen with your spawn rate)
         n = Math.floor(rand(PARTY_START, PARTY_END + 1));
       }
-      
+
       activePhotoNums.add(n);
-      
+
       img.src = photoUrl(n);
       img.alt = "";
-      img.decoding = "async";
-
-      img.alt = ""; // prevents "memory photo" text from showing
       img.decoding = "async";
 
       img.onerror = () => {
@@ -650,11 +614,8 @@ function allCorrect(){
         d.remove();
       };
 
-
       d.appendChild(img);
 
-
-      // randomized animation parameters via CSS variables
       const x0 = rand(-10, 90) + "vw";
       const y0 = rand(-10, 90) + "vh";
       const x1 = rand(-10, 90) + "vw";
@@ -671,20 +632,15 @@ function allCorrect(){
       d.style.setProperty("--driftDur", rand(24, 40) + "s");   // slower movement
       d.style.setProperty("--fadeDur", rand(12, 18) + "s");    // slower fading
 
-
-      // slight random delay so they don't sync
       const delay = rand(0, 2.5);
       d.style.animationDelay = `${delay}s, ${delay}s`;
 
-
       photoParty.appendChild(d);
 
-      // remove after some time so DOM doesn't grow forever
       setTimeout(() => {
         activePhotoNums.delete(n);
         d.remove();
       }, 24000);
-
     }
 
     function startPhotoParty(){
@@ -699,27 +655,14 @@ function allCorrect(){
       }
 
       setInterval(() => {
-        // steady, less aggressive
         spawnFloatingPhoto();
       }, 2000);
-function warmCache(){
-  // preload in the background gradually so it doesn't spike bandwidth
-  let n = PARTY_START;
-
-  const timer = setInterval(() => {
-    const im = new Image();
-    im.src = photoUrl(n);
-    n++;
-    if (n > PARTY_END) clearInterval(timer);
-  }, 120); // gentle preload pace
-}      
     }
 
     yesBtn.addEventListener("click", () => {
       toast.classList.add("show");
       startPhotoParty();
-      
-      // lock the no button so it stops being chaotic after YES
+
       noBtn.style.display = "none";
       yesBtn.textContent = "YES ✅";
       yesBtn.style.transform = "scale(1.12)";
